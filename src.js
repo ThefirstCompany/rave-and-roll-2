@@ -143,7 +143,7 @@ async function list(){
  <td>S/ ${t.price}</td>
  <td>${t.status}</td>
  <td>${t.entry_count}</td>
-<td>${!t.sold?'<button class="sellBtn" data-id="'+t.id+'">🟢 Vender</button>':(t.status==='available'&&t.entry_count===0?'<button class="refundBtn" data-id="'+t.id+'">↩️ Reembolsar</button>':'🔒 Vendida / utilizada')}</td>
+<td>${(!t.sold && t.status==='available' && Number(t.entry_count)===0)?'<button class="sellBtn" data-id="'+t.id+'">🟢 Vender</button>':'🔒 Vendida / utilizada'}</td>
  </tr>`).join('')+
  '</table>';
 
