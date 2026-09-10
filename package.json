@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "build": "vite",
+    "dev": "vite"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.57.0",
+    "html5-qrcode": "^2.3.8",
+    "qrcode": "^1.5.4",
+    "vite": "^7.1.2"
+  }
+}
