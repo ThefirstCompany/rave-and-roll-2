@@ -136,17 +136,22 @@ async function list(){
  }
 
  document.querySelector('#list').innerHTML=
- '<table><tr><th>Código</th><th>Tipo</th><th>Precio</th><th>Estado</th><th>Ingresos</th><th>Venta</th></tr>'+
- data.map(t=>`<tr>
- <td>${t.code}</td>
- <td>${t.type}</td>
- <td>S/ ${t.price}</td>
- <td>${t.status}</td>
- <td>${t.entry_count}</td>
-<td>${(!t.sold && t.status==='available' && Number(t.entry_count)===0)?'<button class="sellBtn" data-id="'+t.id+'">🟢 Vender</button>':'🔒 Vendida / utilizada'}</td>
- </tr>`).join('')+
- '</table>';
-
+'<table><tr><th>Código</th><th>Tipo</th><th>Precio</th><th>Estado</th><th>Ingresos</th><th>Venta</th></tr>'+
+data.map(t=>'<tr>'+
+'<td>'+t.code+'</td>'+
+'<td>'+t.type+'</td>'+
+'<td>S/ '+t.price+'</td>'+
+'<td>'+t.status+'</td>'+
+'<td>'+t.entry_count+'</td>'+
+'<td>'+
+(!t.sold && t.status==='available' && Number(t.entry_count||0)===0
+? '<button class="sellBtn" data-id="'+t.id+'">🟢 Vender</button>'
+: (t.sold && t.status==='available' && Number(t.entry_count||0)===0
+? '<button class="refundBtn" data-id="'+t.id+'">↩️ Reembolsar</button>'
+: '🔒 Vendida / utilizada'))+
+'</td>'+
+'</tr>').join('')+
+'</table>';
  document.querySelectorAll('.sellBtn').forEach(b=>{
    b.onclick=()=>vender(b.dataset.id);
  });
