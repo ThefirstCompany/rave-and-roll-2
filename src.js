@@ -90,6 +90,40 @@ async function startScan(){
  catch(e){document.querySelector('#result').innerHTML='<div class="card">No se pudo abrir la cámara. Puedes introducir el código manualmente.</div>';}
 }
 document.querySelector('#stop').onclick=()=>{if(scanner){scanner.stop().catch(()=>{});scanner=null;}};
+async function vender(id){
+  const r=await sb.from('tickets')
+    .update({sold:true})
+    .eq('id',id)
+    .eq('sold',false)
+    .eq('status','available')
+    .eq('entry_count',0);
+
+  if(r.error){
+    alert('❌ Error al registrar la venta');
+    return;
+  }
+
+  await list();
+  stats();
+}
+
+async function reembolsar(id){
+  const r=await sb.from('tickets')
+    .update({sold:false})
+    .eq('id',id)
+    .eq('sold',true)
+    .eq('status','available')
+    .eq('entry_count',0);
+
+  if(r.error){
+    alert('❌ No se puede reembolsar esta entrada');
+    return;
+  }
+
+  await list();
+  stats();
+}
+
 async function list(){
  const q=(document.querySelector('#search').value||'').trim();
  let query=sb.from('tickets').select('*').order('number').limit(100);
@@ -109,14 +143,16 @@ async function list(){
  <td>S/ ${t.price}</td>
  <td>${t.status}</td>
  <td>${t.entry_count}</td>
- <td>${t.sold?'✅ Vendida':`<button class="sellBtn" data-id="${t.id}">🟢 Vender</button>`}</td>
+<td>${!t.sold?'<button class="sellBtn" data-id="'+t.id+'">🟢 Vender</button>':(t.status==='available'&&t.entry_count===0?'<button class="refundBtn" data-id="'+t.id+'">↩️ Reembolsar</button>':'🔒 Vendida / utilizada')}</td>
  </tr>`).join('')+
  '</table>';
 
  document.querySelectorAll('.sellBtn').forEach(b=>{
    b.onclick=()=>vender(b.dataset.id);
  });
-}
+document.querySelectorAll('.refundBtn').forEach(b=>{
+  b.onclick=()=>reembolsar(b.dataset.id);
+});
 document.querySelector('#search').oninput=list;
 document.querySelector('#loadPrint').onclick=async()=>{
  const {data,error}=await sb.from('tickets').select('*').order('number'); const area=document.querySelector('#printArea');area.innerHTML='';
