@@ -47,9 +47,20 @@ async function stats(){
  `;
 }
 async function getTicket(code){return (await sb.from('tickets').select('*').eq('code',code.trim().toUpperCase()).maybeSingle()).data;}
+async function getTestTicket(code){
+  return (await sb.from('test_tickets')
+    .select('*')
+    .eq('code',code.trim().toUpperCase())
+    .maybeSingle()).data;
+}
 async function control(code){
   const r=document.querySelector('#result');
-  const t=await getTicket(code||'');
+  const cleanCode=(code||'').trim().toUpperCase();
+  const isTest=cleanCode.startsWith('TEST-RR-');
+
+  const t=isTest
+    ? await getTestTicket(cleanCode)
+    : await getTicket(cleanCode);
 
   if(!t){
     r.innerHTML='<div class="card red"><b>❌ QR NO ENCONTRADO</b></div>';
@@ -65,7 +76,8 @@ async function control(code){
   if(t.status==='available'){
     const now=new Date().toISOString();
 
-    const {error}=await sb.from('tickets')
+    const {error}=await sb
+      .from(isTest?'test_tickets':'tickets')
       .update({
         status:'inside',
         first_entry_at:t.first_entry_at||now,
@@ -95,22 +107,84 @@ async function control(code){
   stats();
 }
 async function reentry(code){
- const r=document.querySelector('#result'), t=await getTicket(code||'');
- if(!t){r.innerHTML='<div class="card red">❌ QR NO ENCONTRADO</div>';return;}
- if(t.status!=='outside'){r.innerHTML='<div class="card red">❌ No figura fuera temporalmente.</div>';return;}
- const now=new Date().toISOString();
- const {error}=await sb.from('tickets').update({status:'inside',last_action_at:now,entry_count:(t.entry_count||0)+1}).eq('id',t.id).eq('status','outside');
- document.querySelector('#reentry').style.display='none';
- r.innerHTML=error?'<div class="card red">❌ Error al registrar reingreso.</div>':`<div class="card green"><b>🔄 REINGRESO AUTORIZADO</b><br>${t.code} · ${t.type}</div>`;
- stats();
+  const r=document.querySelector('#result');
+  const cleanCode=(code||'').trim().toUpperCase();
+  const isTest=cleanCode.startsWith('TEST-RR-');
+  const t=isTest
+    ? await getTestTicket(cleanCode)
+    : await getTicket(cleanCode);
+
+  if(!t){
+    r.innerHTML='<div class="card red">❌ QR NO ENCONTRADO</div>';
+    return;
+  }
+
+  if(t.status!=='outside'){
+    r.innerHTML='<div class="card red">❌ No figura fuera temporalmente.</div>';
+    return;
+  }
+
+  const now=new Date().toISOString();
+
+  const {error}=await sb
+    .from(isTest?'test_tickets':'tickets')
+    .update({
+      status:'inside',
+      last_action_at:now,
+      entry_count:(t.entry_count||0)+1
+    })
+    .eq('id',t.id)
+    .eq('status','outside')
+    .eq('sold',true);
+
+  document.querySelector('#reentry').style.display='none';
+
+  r.innerHTML=error
+    ? '<div class="card red">❌ Error al registrar reingreso.</div>'
+    : `<div class="card green"><b>🔄 REINGRESO AUTORIZADO</b><br>${t.code} · ${t.type}</div>`;
+
+  stats();
 }
 async function exit(code){
- const r=document.querySelector('#result'), t=await getTicket(code||'');
- if(!t){r.innerHTML='<div class="card red">❌ QR NO ENCONTRADO</div>';return;}
- if(t.status!=='inside'){r.innerHTML='<div class="card red">❌ No figura como dentro.</div>';return;}
- const {error}=await sb.from('tickets').update({status:'outside',last_action_at:new Date().toISOString(),last_action:'exit'}).eq('id',t.id).eq('status','inside');
- r.innerHTML=error?'<div class="card red">❌ Error.</div>':`<div class="card"><b>🚪 SALIDA REGISTRADA</b><br>${t.code}<br>Conserva su pulsera para permitir el reingreso.</div>`;
- stats();
+  const r=document.querySelector('#result');
+  const cleanCode=(code||'').trim().toUpperCase();
+  const isTest=cleanCode.startsWith('TEST-RR-');
+
+  const t=isTest
+    ? await getTestTicket(cleanCode)
+    : await getTicket(cleanCode);
+
+  if(!t){
+    r.innerHTML='<div class="card red"><b>❌ QR NO ENCONTRADO</b></div>';
+    return;
+  }
+
+  if(!t.sold){
+    r.innerHTML='<div class="card red"><b>🚫 ENTRADA NO VENDIDA</b><br>Esta entrada no está autorizada.</div>';
+    return;
+  }
+
+  if(t.status!=='inside'){
+    r.innerHTML='<div class="card red">❌ No figura como dentro.</div>';
+    return;
+  }
+
+  const {error}=await sb
+    .from(isTest?'test_tickets':'tickets')
+    .update({
+      status:'outside',
+      last_action_at:new Date().toISOString(),
+      last_action:'exit'
+    })
+    .eq('id',t.id)
+    .eq('status','inside')
+    .eq('sold',true);
+
+  r.innerHTML=error
+    ? '<div class="card red">❌ Error al registrar salida.</div>'
+    : `<div class="card"><b>🚪 SALIDA REGISTRADA</b><br>${t.code}<br>Conserva su pulsera para permitir el reingreso.</div>`;
+
+  stats();
 }
 document.querySelector('#validate').onclick=()=>control(document.querySelector('#manual').value);
 document.querySelector('#exit').onclick=()=>exit(document.querySelector('#manual').value);
