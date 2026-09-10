@@ -20,11 +20,31 @@ let scanner=null;
 function show(id){document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('hidden',x.id!==id)); if(scanner){scanner.stop().catch(()=>{});scanner=null;} if(id==='dashboard')stats(); if(id==='tickets')list(); if(id==='scan')startScan();}
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>show(b.dataset.t));
 async function stats(){
- const {data,error}=await sb.from('tickets').select('status,price');
- if(error){document.querySelector('#stats').innerHTML='<div class="card red">No conectado a Supabase.</div>';return;}
- const inside=data.filter(x=>x.status==='inside').length, outside=data.filter(x=>x.status==='outside').length, available=data.filter(x=>x.status==='available').length;
- const revenue=data.reduce((s,x)=>s+Number(x.price),0);
- document.querySelector('#stats').innerHTML=`<div class="card"><b>Total</b><strong>${data.length}</strong></div><div class="card"><b>Dentro</b><strong class="green">${inside}</strong></div><div class="card"><b>Fuera temporalmente</b><strong>${outside}</strong></div><div class="card"><b>Sin validar</b><strong>${available}</strong></div><div class="card"><b>Valor nominal</b><strong>S/ ${revenue.toLocaleString('es-PE')}</strong></div>`;
+ const {data,error}=await sb.from('tickets').select('status,price,sold,entry_count');
+ if(error){
+  document.querySelector('#stats').innerHTML='<div class="card red">No conectado a Supabase.</div>';
+  return;
+ }
+
+ const total=data.length;
+ const sold=data.filter(x=>x.sold===true).length;
+ const availableToSell=total-sold;
+ const inside=data.filter(x=>x.status==='inside').length;
+ const outside=data.filter(x=>x.status==='outside').length;
+ const pending=data.filter(x=>x.sold===true && x.status==='available').length;
+ const revenue=data.filter(x=>x.sold===true).reduce((s,x)=>s+Number(x.price),0);
+ const reentries=data.reduce((s,x)=>s+Math.max((x.entry_count||0)-1,0),0);
+
+ document.querySelector('#stats').innerHTML=`
+ <div class="card"><b>Total</b><strong>${total}</strong></div>
+ <div class="card"><b>Vendidas</b><strong class="green">${sold}</strong></div>
+ <div class="card"><b>Disponibles para vender</b><strong>${availableToSell}</strong></div>
+ <div class="card"><b>Dentro</b><strong class="green">${inside}</strong></div>
+ <div class="card"><b>Fuera temporalmente</b><strong>${outside}</strong></div>
+ <div class="card"><b>Vendidas sin ingresar</b><strong>${pending}</strong></div>
+ <div class="card"><b>Reingresos</b><strong>${reentries}</strong></div>
+ <div class="card"><b>Recaudación</b><strong>S/ ${revenue.toLocaleString('es-PE')}</strong></div>
+ `;
 }
 async function getTicket(code){return (await sb.from('tickets').select('*').eq('code',code.trim().toUpperCase()).maybeSingle()).data;}
 async function control(code){
