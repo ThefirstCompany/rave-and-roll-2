@@ -48,19 +48,51 @@ async function stats(){
 }
 async function getTicket(code){return (await sb.from('tickets').select('*').eq('code',code.trim().toUpperCase()).maybeSingle()).data;}
 async function control(code){
- const r=document.querySelector('#result'), t=await getTicket(code||'');
- if(!t){r.innerHTML='<div class="card red"><b>❌ QR NO ENCONTRADO</b></div>';return;}
- if(t.status==='available'){
-  const now=new Date().toISOString();
-  const {error}=await sb.from('tickets').update({status:'inside',first_entry_at:t.first_entry_at||now,last_action_at:now,entry_count:(t.entry_count||0)+1}).eq('id',t.id).eq('status','available');
-  r.innerHTML=error?'<div class="card red">❌ Error al registrar.</div>':`<div class="card green"><b>✅ PRIMER INGRESO</b><br>${t.code} · ${t.type}<br>Coloca la pulsera y permite el ingreso.</div>`;
-}else if(t.status==='outside'){
- document.querySelector('#reentry').style.display='inline-block';
- r.innerHTML=`<div class="card"><b>🔄 REINGRESO DISPONIBLE</b><br>${t.code} · ${t.type}<br>La persona salió anteriormente. Confirma el reingreso.</div>`;
- }else{
-  r.innerHTML=`<div class="card red"><b>⚠️ PERSONA YA ESTÁ DENTRO</b><br>${t.code} · ${t.type}<br>No vuelvas a validar: si la persona está intentando entrar otra vez, verifica físicamente su pulsera.</div>`;
- }
- stats();
+  const r=document.querySelector('#result');
+  const t=await getTicket(code||'');
+
+  if(!t){
+    r.innerHTML='<div class="card red"><b>❌ QR NO ENCONTRADO</b></div>';
+    return;
+  }
+
+  if(!t.sold){
+    r.innerHTML=`<div class="card red"><b>🚫 ENTRADA NO VENDIDA</b><br>${t.code} · ${t.type}<br>Esta entrada no está autorizada para ingresar al evento.</div>`;
+    document.querySelector('#reentry').style.display='none';
+    return;
+  }
+
+  if(t.status==='available'){
+    const now=new Date().toISOString();
+
+    const {error}=await sb.from('tickets')
+      .update({
+        status:'inside',
+        first_entry_at:t.first_entry_at||now,
+        last_action_at:now,
+        entry_count:(t.entry_count||0)+1
+      })
+      .eq('id',t.id)
+      .eq('status','available')
+      .eq('sold',true);
+
+    r.innerHTML=error
+      ? '<div class="card red">❌ Error al registrar.</div>'
+      : `<div class="card green"><b>✅ PRIMER INGRESO</b><br>${t.code} · ${t.type}<br>Coloca la pulsera y permite el ingreso.</div>`;
+
+  }else if(t.status==='outside'){
+
+    document.querySelector('#reentry').style.display='inline-block';
+
+    r.innerHTML=`<div class="card"><b>🔄 REINGRESO DISPONIBLE</b><br>${t.code} · ${t.type}<br>La persona salió anteriormente. Confirma el reingreso.</div>`;
+
+  }else{
+
+    r.innerHTML=`<div class="card red"><b>⚠️ PERSONA YA ESTÁ DENTRO</b><br>${t.code} · ${t.type}<br>No vuelvas a validar: si la persona está intentando entrar otra vez, verifica físicamente su pulsera.</div>`;
+
+  }
+
+  stats();
 }
 async function reentry(code){
  const r=document.querySelector('#result'), t=await getTicket(code||'');
