@@ -159,10 +159,12 @@ document.querySelectorAll('.refundBtn').forEach(b=>{
   b.onclick=()=>reembolsar(b.dataset.id);
 });
 document.querySelector('#search').oninput=list;
+}
 document.querySelector('#loadPrint').onclick=async()=>{
  const {data,error}=await sb.from('tickets').select('*').order('number'); const area=document.querySelector('#printArea');area.innerHTML='';
  if(error){area.textContent='Error';return;}
  for(const t of data){const d=document.createElement('div');d.className='ticket';d.innerHTML=`<b>RAVE & ROLL 2.0</b><br><small>27 SEPTIEMBRE 2026</small><br><strong>${t.type}</strong><div class="q"></div><b>${t.code}</b>`;area.appendChild(d);d.querySelector('.q').innerHTML=`<img src="${await QRCode.toDataURL(t.code,{width:150,margin:1})}">`;}
 };
-show('dashboard');
+
  };
+show('dashboard');
