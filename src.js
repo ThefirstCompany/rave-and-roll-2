@@ -11,7 +11,7 @@ app.innerHTML=`<header><h1>RAVE & ROLL 2.0</h1><p>27 de septiembre de 2026 · 50
 <nav><button data-t="dashboard">Panel</button><button data-t="scan">Escanear</button><button data-t="tickets">Entradas</button><button data-t="print">Pulseras</button></nav>
 <main>
 <section id="dashboard" class="tab"><div id="stats" class="grid"></div><div class="card"><b>Preventa 1:</b> 125 × S/15 &nbsp; <b>Preventa 2:</b> 175 × S/20 &nbsp; <b>General:</b> 200 × S/30</div></section>
-<section id="scan" class="tab hidden"><div class="card"><h2>Control de acceso</h2><div id="reader"></div><input id="manual" placeholder="RR2-0001"><div class="actions"><button id="validate">Validar QR</button><button id="stop">Detener cámara</button></div><div id="result"></div></div></section>
+<section id="scan" class="tab hidden"><div class="card"><h2>Control de acceso</h2><div id="reader"></div><input id="manual" placeholder="RR2-0001"><div class="actions"><button id="validate">Validar QR</button><button id="exit">🚪 Registrar salida</button><button id="stop">Detener cámara</button></div><div id="result"></div></div></section>
 <section id="tickets" class="tab hidden"><div class="card"><h2>Buscar entradas</h2><input id="search" placeholder="Código o tipo"><div id="list"></div></div></section>
 <section id="print" class="tab hidden"><div class="card"><h2>Pulseras con QR</h2><p>Genera una plantilla con un QR único por entrada.</p><button id="loadPrint">Generar 500</button> <button onclick="window.print()">Imprimir</button><div id="printArea"></div></div></section>
 </main>`;
