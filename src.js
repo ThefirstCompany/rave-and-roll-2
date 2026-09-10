@@ -52,6 +52,7 @@ async function exit(code){
  stats();
 }
 document.querySelector('#validate').onclick=()=>control(document.querySelector('#manual').value);
+document.querySelector('#exit').onclick=()=>exit(document.querySelector('#manual').value);
 document.querySelector('#manual').addEventListener('keydown',e=>{if(e.key==='Enter')control(e.target.value)});
 async function startScan(){
  scanner=new Html5Qrcode('reader');
