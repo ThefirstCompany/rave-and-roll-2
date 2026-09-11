@@ -331,5 +331,30 @@ document.querySelector('#loadPrint').onclick=async()=>{
  if(error){area.textContent='Error';return;}
  for(const t of data){const d=document.createElement('div');d.className='ticket';d.innerHTML=`<b>RAVE & ROLL 2.0</b><br><small>27 SEPTIEMBRE 2026</small><br><strong>${t.type}</strong><div class="q"></div><b>${t.code}</b>`;area.appendChild(d);d.querySelector('.q').innerHTML=`<img src="${await QRCode.toDataURL(t.code,{width:150,margin:1})}">`;}
 };
+// LOGIN DE ADMINISTRADOR
+document.querySelector('#loginBtn').onclick = async () => {
+  const email = document.querySelector('#loginEmail').value.trim();
+  const password = document.querySelector('#loginPassword').value;
+  const result = document.querySelector('#loginResult');
 
+  result.innerHTML = '⏳ Ingresando...';
+
+  const { data, error } = await sb.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    result.innerHTML = '❌ ' + error.message;
+    return;
+  }
+
+  if (data.session) {
+    document.querySelector('#login').style.display = 'none';
+    document.querySelector('#adminApp').style.display = 'block';
+    result.innerHTML = '';
+    show('dashboard');
+    await stats();
+  }
+};
 show('dashboard');
