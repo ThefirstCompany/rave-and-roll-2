@@ -7,7 +7,7 @@ const SUPABASE_URL='https://ldnxjysbdtgzrrckixpt.supabase.co';
 const SUPABASE_ANON_KEY='sb_publishable_g3YlYLl8kfb7yDqLYXhGsQ_Ps3sah8g';
 const sb=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 const app=document.querySelector('#app');
-app.innerHTML=`<section id="login" class="card"><h2>🔐 Acceso de administrador</h2><input id="loginEmail" type="email" placeholder="Correo"><div style="display:flex;gap:6px"><input id="loginPassword" type="password" placeholder="Contraseña" style="flex:1"><button id="togglePassword" type="button">👁️</button></div><button id="loginBtn">🔓 Ingresar</button><div id="loginResult"></div></section><div id="adminApp" style="display:none"><header><h1>RAVE & ROLL 2.0</h1><p>4 de octubre de 2026 · 500 entradas</p></header>
+app.innerHTML=`<section id="login" class="card"><h2>🔐 Acceso de administrador</h2><input id="loginUsername" type="text" placeholder="Usuario"><div style="display:flex;gap:6px"><input id="loginPassword" type="password" placeholder="Contraseña" style="flex:1"><button id="togglePassword" type="button">👁️</button></div><button id="loginBtn">🔓 Ingresar</button><div id="loginResult"></div></section><div id="adminApp" style="display:none"><header><h1>RAVE & ROLL 2.0</h1><p>4 de octubre de 2026 · 500 entradas</p></header>
 <nav><button data-t="dashboard">Panel</button><button data-t="training">🎓 Capacitación</button><button data-t="scan">Escanear</button><button data-t="tickets">Entradas</button><button data-t="print">Pulseras</button></nav>
 <main>
 <section id="dashboard" class="tab"><div id="stats" class="grid"></div><div class="card"><b>Preventa 1:</b> 125 × S/15 &nbsp; <b>Preventa 2:</b> 175 × S/20 &nbsp; <b>General:</b> 200 × S/30</div></section>
@@ -333,9 +333,20 @@ document.querySelector('#loadPrint').onclick=async()=>{
 };
 // LOGIN DE ADMINISTRADOR
 document.querySelector('#loginBtn').onclick = async () => {
-  const email = document.querySelector('#loginEmail').value.trim();
-  const password = document.querySelector('#loginPassword').value;
-  const result = document.querySelector('#loginResult');
+  const username = document.querySelector('#loginUsername').value.trim().toLowerCase();
+const password = document.querySelector('#loginPassword').value;
+const result = document.querySelector('#loginResult');
+
+const usuarios = {
+  admin: 'fresia.rojas14@gmail.com'
+};
+
+const email = usuarios[username];
+
+if(!email){
+  result.innerHTML='❌ Usuario no encontrado';
+  return;
+}
 
   result.innerHTML = '⏳ Ingresando...';
 
