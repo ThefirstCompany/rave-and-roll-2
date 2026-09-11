@@ -7,7 +7,7 @@ const SUPABASE_URL='https://ldnxjysbdtgzrrckixpt.supabase.co';
 const SUPABASE_ANON_KEY='sb_publishable_g3YlYLl8kfb7yDqLYXhGsQ_Ps3sah8g';
 const sb=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 const app=document.querySelector('#app');
-app.innerHTML=`<header><h1>RAVE & ROLL 2.0</h1><p>27 de septiembre de 2026 · 500 entradas</p></header>
+app.innerHTML=`<header><h1>RAVE & ROLL 2.0</h1><p>4 de octubre de 2026 · 500 entradas</p></header>
 <nav><button data-t="dashboard">Panel</button><button data-t="training">🎓 Capacitación</button><button data-t="scan">Escanear</button><button data-t="tickets">Entradas</button><button data-t="print">Pulseras</button></nav>
 <main>
 <section id="dashboard" class="tab"><div id="stats" class="grid"></div><div class="card"><b>Preventa 1:</b> 125 × S/15 &nbsp; <b>Preventa 2:</b> 175 × S/20 &nbsp; <b>General:</b> 200 × S/30</div></section>
