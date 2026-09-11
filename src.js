@@ -8,15 +8,64 @@ const SUPABASE_ANON_KEY='sb_publishable_g3YlYLl8kfb7yDqLYXhGsQ_Ps3sah8g';
 const sb=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 const app=document.querySelector('#app');
 app.innerHTML=`<header><h1>RAVE & ROLL 2.0</h1><p>27 de septiembre de 2026 · 500 entradas</p></header>
-<nav><button data-t="dashboard">Panel</button><button data-t="scan">Escanear</button><button data-t="tickets">Entradas</button><button data-t="print">Pulseras</button></nav>
+<nav><button data-t="dashboard">Panel</button><button data-t="training">🎓 Capacitación</button><button data-t="scan">Escanear</button><button data-t="tickets">Entradas</button><button data-t="print">Pulseras</button></nav>
 <main>
 <section id="dashboard" class="tab"><div id="stats" class="grid"></div><div class="card"><b>Preventa 1:</b> 125 × S/15 &nbsp; <b>Preventa 2:</b> 175 × S/20 &nbsp; <b>General:</b> 200 × S/30</div></section>
 <section id="scan" class="tab hidden"><div class="card"><h2>Control de acceso</h2><div id="reader"></div><input id="manual" placeholder="RR2-0001"><div class="actions"><button id="validate">Validar QR</button><button id="exit">🚪 Registrar salida</button><button id="reentry" style="display:none">🔄 Reingreso</button><button id="stop">Detener cámara</button></div><div id="result"></div></div></section>
 <section id="tickets" class="tab hidden"><div class="card"><h2>Buscar entradas</h2><input id="search" placeholder="Código o tipo"><div id="list"></div></div></section>
 <section id="print" class="tab hidden"><div class="card"><h2>Pulseras con QR</h2><p>Genera una plantilla con un QR único por entrada.</p><button id="loadPrint">Generar 500</button> <button onclick="window.print()">Imprimir</button><div id="printArea"></div></div></section>
+<section id="training" class="tab hidden">
+<div class="card">
+<h2>🎓 Modo Capacitación</h2>
+<p>Entrena al personal usando estas entradas. No afectan las 500 entradas reales.</p>
+<div class="card"><b>🟢 TEST-RR-001</b><br>Entrada válida de práctica.</div>
+<div class="card"><b>🔴 TEST-RR-002</b><br>Entrada no vendida de práctica.</div>
+<button id="resetTraining">🔄 Reiniciar capacitación</button>
+<div id="trainingResult"></div>
+</div>
+</section>
 </main>`;
 
 let scanner=null;
+async function resetTraining(){
+  const ok=confirm('¿Reiniciar las 2 entradas de capacitación? No se modificará ninguna entrada real.');
+  if(!ok)return;
+
+  const {error}=await sb.from('test_tickets')
+    .update({
+      status:'available',
+      sold:true,
+      entry_count:0,
+      first_entry_at:null,
+      last_action_at:null,
+      last_action:null
+    })
+    .eq('code','TEST-RR-001');
+
+  if(error){
+    document.querySelector('#trainingResult').innerHTML='<div class="card red">❌ No se pudo reiniciar TEST-RR-001.</div>';
+    return;
+  }
+
+  const {error:error2}=await sb.from('test_tickets')
+    .update({
+      status:'available',
+      sold:false,
+      entry_count:0,
+      first_entry_at:null,
+      last_action_at:null,
+      last_action:null
+    })
+    .eq('code','TEST-RR-002');
+
+  if(error2){
+    document.querySelector('#trainingResult').innerHTML='<div class="card red">❌ No se pudo reiniciar TEST-RR-002.</div>';
+    return;
+  }
+
+  document.querySelector('#trainingResult').innerHTML='<div class="card green"><b>✅ Capacitación reiniciada</b><br>TEST-RR-001 está lista para una entrada válida y TEST-RR-002 para una entrada rechazada.</div>';
+}
+document.querySelector('#resetTraining').onclick=resetTraining;
 function show(id){document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('hidden',x.id!==id)); if(scanner){scanner.stop().catch(()=>{});scanner=null;} if(id==='dashboard')stats(); if(id==='tickets')list(); if(id==='scan')startScan();}
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>show(b.dataset.t));
 async function stats(){
