@@ -246,35 +246,46 @@ async function startScan(){
 }
 document.querySelector('#stop').onclick=()=>{if(scanner){scanner.stop().catch(()=>{});scanner=null;}};
 async function vender(id){
-  const r=await sb.from('tickets')
+  const {data,error}=await sb.from('tickets')
     .update({sold:true})
     .eq('id',id)
     .eq('sold',false)
     .eq('status','available')
-    .eq('entry_count',0);
+    .eq('entry_count',0)
+    .select('id')
+    .maybeSingle();
 
-  if(r.error){
-    alert('❌ Error al registrar la venta');
+  if(error || !data){
+    alert('⚠️ Esta entrada ya fue vendida o utilizada.');
+    await list();
     return;
   }
 
+  alert('✅ Venta registrada correctamente.');
   await list();
   stats();
 }
 
 async function reembolsar(id){
-  const r=await sb.from('tickets')
+  const ok=confirm('¿Confirmas el reembolso de esta entrada?');
+  if(!ok)return;
+
+  const {data,error}=await sb.from('tickets')
     .update({sold:false})
     .eq('id',id)
     .eq('sold',true)
     .eq('status','available')
-    .eq('entry_count',0);
+    .eq('entry_count',0)
+    .select('id')
+    .maybeSingle();
 
-  if(r.error){
-    alert('❌ No se puede reembolsar esta entrada');
+  if(error || !data){
+    alert('⚠️ Esta entrada ya no puede ser reembolsada.');
+    await list();
     return;
   }
 
+  alert('↩️ Reembolso registrado correctamente.');
   await list();
   stats();
 }
