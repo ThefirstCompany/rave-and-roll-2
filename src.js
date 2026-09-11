@@ -381,3 +381,59 @@ document.querySelector('#togglePassword').onclick=()=>{
     b.textContent='👁️';
   }
 };
+// RECUPERACIÓN DE CONTRASEÑA
+sb.auth.onAuthStateChange(async (event, session) => {
+  if (event !== 'PASSWORD_RECOVERY') return;
+
+  document.querySelector('#login').style.display = 'none';
+  document.querySelector('#adminApp').style.display = 'none';
+
+  app.insertAdjacentHTML('beforeend', `
+    <section id="recovery" class="card">
+      <h2>🔑 Cambiar contraseña</h2>
+      <p>Ingresa tu nueva contraseña.</p>
+
+      <input id="newPassword" type="password" placeholder="Nueva contraseña">
+
+      <input id="confirmPassword" type="password" placeholder="Repetir contraseña">
+
+      <button id="savePassword">💾 Guardar nueva contraseña</button>
+
+      <div id="recoveryResult"></div>
+    </section>
+  `);
+
+  document.querySelector('#savePassword').onclick = async () => {
+    const password = document.querySelector('#newPassword').value;
+    const confirmPassword = document.querySelector('#confirmPassword').value;
+    const result = document.querySelector('#recoveryResult');
+
+    if (password.length < 6) {
+      result.innerHTML = '❌ La contraseña debe tener mínimo 6 caracteres.';
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      result.innerHTML = '❌ Las contraseñas no coinciden.';
+      return;
+    }
+
+    result.innerHTML = '⏳ Guardando...';
+
+    const { error } = await sb.auth.updateUser({
+      password: password
+    });
+
+    if (error) {
+      result.innerHTML = '❌ ' + error.message;
+      return;
+    }
+
+    result.innerHTML = '✅ Contraseña cambiada correctamente.';
+
+    setTimeout(async () => {
+      await sb.auth.signOut();
+      location.reload();
+    }, 2000);
+  };
+});
