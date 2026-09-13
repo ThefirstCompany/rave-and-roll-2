@@ -364,16 +364,10 @@ document.querySelector('#loginBtn').onclick = async () => {
     result.innerHTML = '❌ ' + error.message;
     return;
   }
-const { data: roleRow, error: roleError } = await sb
-  .from('user_roles')
-  .select('user_id,username,role');
+const { data: roleData, error: roleError } =
+  await sb.rpc('get_my_role');
 
-result.innerHTML =
-  'ID: ' + data.user.id +
-  '<br>FILAS: ' + JSON.stringify(roleRow) +
-  '<br>ERROR: ' + JSON.stringify(roleError);
-
-return;
+const roleRow = roleData?.[0] || null;
 
 if(roleError){
   await sb.auth.signOut();
