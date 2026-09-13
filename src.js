@@ -364,12 +364,12 @@ document.querySelector('#loginBtn').onclick = async () => {
     result.innerHTML = '❌ ' + error.message;
     return;
   }
-const { data: roleRow, error: roleError } = await sb
-  .from('user_roles')
-  .select('user_id,username,role')
-  .eq('user_id', data.user.id)
+const { data: roleData, error: roleError } = await sb
+  .from('my_role')
+  .select('username,role')
   .maybeSingle();
 
+const roleRow = roleData || null;
 if(roleError){
   await sb.auth.signOut();
   result.innerHTML = '❌ Error al consultar el rol: ' + roleError.message;
