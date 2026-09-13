@@ -27,6 +27,7 @@ app.innerHTML=`<section id="login" class="card"><h2>🔐 Acceso de administrador
 </main>`;
 
 let scanner=null;
+let currentRole='';
 async function resetTraining(){
   const ok=confirm('¿Reiniciar las 2 entradas de capacitación? No se modificará ninguna entrada real.');
   if(!ok)return;
