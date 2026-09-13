@@ -427,7 +427,6 @@ if(!roleRow){
       document.querySelector('#adminApp').style.display = 'none';
       result.innerHTML = '❌ Rol no autorizado';
     }
-  }
 };
 document.querySelector('#togglePassword').onclick=()=>{
   const p=document.querySelector('#loginPassword');
