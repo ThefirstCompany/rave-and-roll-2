@@ -364,27 +364,22 @@ document.querySelector('#loginBtn').onclick = async () => {
     result.innerHTML = '❌ ' + error.message;
     return;
   }
-const { data: roleData, error: roleError } = await sb
-  .from('my_role')
-  .select('username,role')
-  .maybeSingle();
+const roles = {
+  admin: 'admin',
+  ventas: 'ventas',
+  pulsera1: 'puerta',
+  pulsera2: 'puerta'
+};
 
-const roleRow = roleData || null;
-if(roleError){
+const currentUserRole = roles[username];
+
+if(!currentUserRole){
   await sb.auth.signOut();
-  result.innerHTML = '❌ Error al consultar el rol: ' + roleError.message;
+  result.innerHTML = '❌ Usuario sin rol asignado.';
   return;
 }
 
-if(!roleRow){
-  await sb.auth.signOut();
-  result.innerHTML = '❌ No se encontró el rol. Revisa la consola.';
-  return;
-}
-
-
-    currentRole = roleRow.role;
-console.log('ROL ENCONTRADO:', roleRow);
+currentRole = currentUserRole;
     document.querySelector('#login').style.display = 'none';
     document.querySelector('#adminApp').style.display = 'block';
     result.innerHTML = '';
