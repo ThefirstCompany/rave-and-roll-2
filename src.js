@@ -382,6 +382,14 @@ if(!currentUserRole){
 currentRole = currentUserRole;
     document.querySelector('#login').style.display = 'none';
     document.querySelector('#adminApp').style.display = 'block';
+  const logoutBtn = document.createElement('button');
+logoutBtn.textContent = '🚪 Cerrar sesión';
+logoutBtn.onclick = async () => {
+  await sb.auth.signOut();
+  location.reload();
+};
+
+document.querySelector('#adminApp').prepend(logoutBtn);
     result.innerHTML = '';
 
     // OCULTAR TODAS LAS SECCIONES
