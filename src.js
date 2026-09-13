@@ -332,22 +332,26 @@ document.querySelector('#loadPrint').onclick=async()=>{
  if(error){area.textContent='Error';return;}
  for(const t of data){const d=document.createElement('div');d.className='ticket';d.innerHTML=`<b>RAVE & ROLL 2.0</b><br><small>27 SEPTIEMBRE 2026</small><br><strong>${t.type}</strong><div class="q"></div><b>${t.code}</b>`;area.appendChild(d);d.querySelector('.q').innerHTML=`<img src="${await QRCode.toDataURL(t.code,{width:150,margin:1})}">`;}
 };
-// LOGIN DE ADMINISTRADOR
+// LOGIN Y ROLES
 document.querySelector('#loginBtn').onclick = async () => {
-  const username = document.querySelector('#loginUsername').value.trim().toLowerCase();
-const password = document.querySelector('#loginPassword').value;
-const result = document.querySelector('#loginResult');
 
-const usuarios = {
-  admin: 'fresia.rojas14@gmail.com'
+  const username = document.querySelector('#loginUsername').value.trim().toLowerCase();
+  const password = document.querySelector('#loginPassword').value;
+  const result = document.querySelector('#loginResult');
+
+  const usuarios = {
+  admin: 'fresia.rojas14@gmail.com',
+  ventas: 'thefirstcompany14@gmail.com',
+  pulsera1: 'ruizgerrar@gmail.com',
+  pulsera2: 'christophergerraruizsantillan@gmail.com'
 };
 
-const email = usuarios[username];
+  const email = usuarios[username];
 
-if(!email){
-  result.innerHTML='❌ Usuario no encontrado';
-  return;
-}
+  if(!email){
+    result.innerHTML = '❌ Usuario no encontrado';
+    return;
+  }
 
   result.innerHTML = '⏳ Ingresando...';
 
@@ -356,20 +360,71 @@ if(!email){
     password
   });
 
-  if (error) {
+  if(error){
     result.innerHTML = '❌ ' + error.message;
     return;
   }
 
-  if (data.session) {
+  if(data.session){
+
+    const { data: roleRow, error: roleError } = await sb
+      .from('user_roles')
+      .select('username,role')
+      .eq('user_id', data.user.id)
+      .maybeSingle();
+
+    if(roleError || !roleRow){
+      await sb.auth.signOut();
+      result.innerHTML = '❌ Este usuario no tiene un rol configurado.';
+      return;
+    }
+
+    currentRole = roleRow.role;
+
     document.querySelector('#login').style.display = 'none';
     document.querySelector('#adminApp').style.display = 'block';
     result.innerHTML = '';
-    show('dashboard');
-    await stats();
+
+    // OCULTAR TODAS LAS SECCIONES
+    document.querySelectorAll('nav button').forEach(b => {
+      b.style.display = 'none';
+    });
+
+    // ADMIN: acceso completo
+    if(currentRole === 'admin'){
+      document.querySelector('[data-t="dashboard"]').style.display = 'inline-block';
+      document.querySelector('[data-t="scan"]').style.display = 'inline-block';
+      document.querySelector('[data-t="tickets"]').style.display = 'inline-block';
+      document.querySelector('[data-t="print"]').style.display = 'inline-block';
+      document.querySelector('[data-t="training"]').style.display = 'inline-block';
+
+      show('dashboard');
+      await stats();
+    }
+
+    // VENTAS: solo ventas y consulta de tickets
+    else if(currentRole === 'ventas'){
+      document.querySelector('[data-t="tickets"]').style.display = 'inline-block';
+
+      show('tickets');
+      await list();
+    }
+
+    // PUERTA: solo escáner
+    else if(currentRole === 'puerta'){
+      document.querySelector('[data-t="scan"]').style.display = 'inline-block';
+
+      show('scan');
+    }
+
+    else{
+      await sb.auth.signOut();
+      document.querySelector('#login').style.display = 'block';
+      document.querySelector('#adminApp').style.display = 'none';
+      result.innerHTML = '❌ Rol no autorizado';
+    }
   }
 };
-show('dashboard');
 document.querySelector('#togglePassword').onclick=()=>{
   const p=document.querySelector('#loginPassword');
   const b=document.querySelector('#togglePassword');
