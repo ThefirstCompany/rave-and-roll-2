@@ -366,18 +366,15 @@ document.querySelector('#loginBtn').onclick = async () => {
   }
 const { data: roleRow, error: roleError } = await sb
   .from('user_roles')
-  .select('user_id,username,role')
-  .eq('user_id', data.user.id)
-  .maybeSingle();
+  .select('user_id,username,role');
 
-console.log('USUARIO AUTH:', data.user.id);
-console.log('ROL:', roleRow);
-console.log('ERROR ROL:', roleError);
 result.innerHTML =
   'ID: ' + data.user.id +
-  '<br>ROL: ' + JSON.stringify(roleRow) +
+  '<br>FILAS: ' + JSON.stringify(roleRow) +
   '<br>ERROR: ' + JSON.stringify(roleError);
+
 return;
+
 if(roleError){
   await sb.auth.signOut();
   result.innerHTML = '❌ Error al consultar el rol: ' + roleError.message;
