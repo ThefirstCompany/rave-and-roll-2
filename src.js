@@ -367,8 +367,12 @@ document.querySelector('#loginBtn').onclick = async () => {
 const { data: roleRow, error: roleError } = await sb
   .from('user_roles')
   .select('user_id,username,role')
-  .eq('username', username)
+  .eq('user_id', data.user.id)
   .maybeSingle();
+
+console.log('USUARIO AUTH:', data.user.id);
+console.log('ROL:', roleRow);
+console.log('ERROR ROL:', roleError);
 
 if(roleError){
   await sb.auth.signOut();
@@ -378,7 +382,7 @@ if(roleError){
 
 if(!roleRow){
   await sb.auth.signOut();
-  result.innerHTML = '❌ No se encontró el rol de este usuario.';
+  result.innerHTML = '❌ No se encontró el rol. Revisa la consola.';
   return;
 }
 
