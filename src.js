@@ -365,7 +365,9 @@ document.querySelector('#loginBtn').onclick = async () => {
     return;
   }
 const { data: roleData, error: roleError } =
-  await sb.rpc('get_my_role');
+  await sb.rpc('get_my_role', {
+  p_user_id: data.user.id
+});
 
 const roleRow = roleData?.[0] || null;
 
