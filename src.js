@@ -366,8 +366,8 @@ document.querySelector('#loginBtn').onclick = async () => {
   }
 const { data: roleRow, error: roleError } = await sb
   .from('user_roles')
-  .select('username,role')
-  .eq('user_id', data.user.id)
+  .select('user_id,username,role')
+  .eq('username', username)
   .maybeSingle();
 
 if(roleError){
@@ -384,7 +384,7 @@ if(!roleRow){
 
 
     currentRole = roleRow.role;
-
+console.log('ROL ENCONTRADO:', roleRow);
     document.querySelector('#login').style.display = 'none';
     document.querySelector('#adminApp').style.display = 'block';
     result.innerHTML = '';
