@@ -364,20 +364,24 @@ document.querySelector('#loginBtn').onclick = async () => {
     result.innerHTML = '❌ ' + error.message;
     return;
   }
+const { data: roleRow, error: roleError } = await sb
+  .from('user_roles')
+  .select('username,role')
+  .eq('user_id', data.user.id)
+  .maybeSingle();
 
-  if(data.session){
+if(roleError){
+  await sb.auth.signOut();
+  result.innerHTML = '❌ Error al consultar el rol: ' + roleError.message;
+  return;
+}
 
-    const { data: roleRow, error: roleError } = await sb
-      .from('user_roles')
-      .select('username,role')
-      .eq('user_id', data.user.id)
-      .maybeSingle();
+if(!roleRow){
+  await sb.auth.signOut();
+  result.innerHTML = '❌ No se encontró el rol de este usuario.';
+  return;
+}
 
-    if(roleError || !roleRow){
-      await sb.auth.signOut();
-      result.innerHTML = '❌ Este usuario no tiene un rol configurado.';
-      return;
-    }
 
     currentRole = roleRow.role;
 
