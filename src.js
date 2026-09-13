@@ -364,12 +364,11 @@ document.querySelector('#loginBtn').onclick = async () => {
     result.innerHTML = '❌ ' + error.message;
     return;
   }
-const { data: roleData, error: roleError } =
-  await sb.rpc('get_my_role', {
-  p_user_id: data.user.id
-});
-
-const roleRow = roleData?.[0] || null;
+const { data: roleRow, error: roleError } = await sb
+  .from('user_roles')
+  .select('user_id,username,role')
+  .eq('user_id', data.user.id)
+  .maybeSingle();
 
 if(roleError){
   await sb.auth.signOut();
