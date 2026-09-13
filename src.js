@@ -24,6 +24,19 @@ app.innerHTML=`<section id="login" class="card"><h2>🔐 Acceso de administrador
 <div id="trainingResult"></div>
 </div>
 </section>
+<section id="passwordAdmin" class="tab hidden">
+  <div class="card">
+    <h2>🔑 Administración de contraseñas</h2>
+    <p>Solo el administrador puede cambiar las contraseñas.</p>
+
+    <button id="changeAdminPassword">🔐 Cambiar contraseña de administrador</button>
+    <button id="changeVentasPassword">💰 Cambiar contraseña de Ventas</button>
+    <button id="changePulsera1Password">🎟️ Cambiar contraseña de Pulseras 1</button>
+    <button id="changePulsera2Password">🎟️ Cambiar contraseña de Pulseras 2</button>
+
+    <div id="passwordAdminResult"></div>
+  </div>
+</section>
 </main>`;
 
 let scanner=null;
@@ -390,6 +403,18 @@ logoutBtn.onclick = async () => {
 };
 
 document.querySelector('#adminApp').prepend(logoutBtn);
+  // 🔐 CAMBIO DE CONTRASEÑAS — SOLO ADMIN
+if(currentRole === 'admin'){
+  const passwordBtn = document.createElement('button');
+
+  passwordBtn.textContent = '🔑 Cambiar contraseñas';
+
+  passwordBtn.onclick = () => {
+    show('passwordAdmin');
+  };
+
+  document.querySelector('#adminApp').prepend(passwordBtn);
+}
     result.innerHTML = '';
 
     // OCULTAR TODAS LAS SECCIONES
