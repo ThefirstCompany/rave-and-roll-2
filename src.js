@@ -373,7 +373,11 @@ const { data: roleRow, error: roleError } = await sb
 console.log('USUARIO AUTH:', data.user.id);
 console.log('ROL:', roleRow);
 console.log('ERROR ROL:', roleError);
-
+result.innerHTML =
+  'ID: ' + data.user.id +
+  '<br>ROL: ' + JSON.stringify(roleRow) +
+  '<br>ERROR: ' + JSON.stringify(roleError);
+return;
 if(roleError){
   await sb.auth.signOut();
   result.innerHTML = '❌ Error al consultar el rol: ' + roleError.message;
