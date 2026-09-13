@@ -403,8 +403,75 @@ logoutBtn.onclick = async () => {
 };
 
 document.querySelector('#adminApp').prepend(logoutBtn);
-  // 🔐 CAMBIO DE CONTRASEÑAS — SOLO ADMIN
+// 🔐 CAMBIO DE CONTRASEÑAS — SOLO ADMIN
+
+const empleados = {
+  ventas: '18caa792-3707-4d21-a8c6-a1cffd78a070',
+  pulsera1: '0a57941d-27fb-438b-9613-761816d264d1',
+  pulsera2: 'd23e8a79-bedf-4dbe-9779-1ea2d666343c'
+};
+
+async function cambiarPasswordEmpleado(userId, nombre) {
+
+  if(currentRole !== 'admin'){
+    alert('🚫 Solo el administrador puede cambiar contraseñas.');
+    return;
+  }
+
+  const password = prompt(
+    `🔑 Nueva contraseña para ${nombre}:`
+  );
+
+  if(password === null) return;
+
+  if(password.length < 6){
+    alert('❌ La contraseña debe tener al menos 6 caracteres.');
+    return;
+  }
+
+  const confirmar = prompt(
+    `🔑 Repite la contraseña para ${nombre}:`
+  );
+
+  if(password !== confirmar){
+    alert('❌ Las contraseñas no coinciden.');
+    return;
+  }
+
+  const { data: { session } } = await sb.auth.getSession();
+
+  if(!session){
+    alert('❌ Sesión de administrador no encontrada.');
+    return;
+  }
+
+  const { data, error } = await sb.functions.invoke(
+    'admin-change-password',
+    {
+      body: {
+        user_id: userId,
+        password: password
+      }
+    }
+  );
+
+  if(error){
+    alert('❌ Error: ' + error.message);
+    return;
+  }
+
+  if(data?.error){
+    alert('❌ ' + data.error);
+    return;
+  }
+
+  alert('✅ Contraseña de ' + nombre + ' cambiada correctamente.');
+}
+
+
+// BOTÓN PRINCIPAL — SOLO ADMIN
 if(currentRole === 'admin'){
+
   const passwordBtn = document.createElement('button');
 
   passwordBtn.textContent = '🔑 Cambiar contraseñas';
@@ -414,6 +481,34 @@ if(currentRole === 'admin'){
   };
 
   document.querySelector('#adminApp').prepend(passwordBtn);
+
+
+  // BOTÓN VENTAS
+  document.querySelector('#changeVentasPassword').onclick = () => {
+    cambiarPasswordEmpleado(
+      empleados.ventas,
+      'Ventas'
+    );
+  };
+
+
+  // BOTÓN PULSERA 1
+  document.querySelector('#changePulsera1Password').onclick = () => {
+    cambiarPasswordEmpleado(
+      empleados.pulsera1,
+      'Pulsera 1'
+    );
+  };
+
+
+  // BOTÓN PULSERA 2
+  document.querySelector('#changePulsera2Password').onclick = () => {
+    cambiarPasswordEmpleado(
+      empleados.pulsera2,
+      'Pulsera 2'
+    );
+  };
+
 }
     result.innerHTML = '';
 
