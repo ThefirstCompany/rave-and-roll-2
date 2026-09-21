@@ -406,7 +406,7 @@ document.querySelector('#adminApp').prepend(logoutBtn);
 // 🔐 CAMBIO DE CONTRASEÑAS — SOLO ADMIN
 
 const empleados = {
-  ventas: '18caa792-3707-4d21-a8c6-a1cffd78a070',
+  ventas: '4d7fdbb0-4406-4bd0-a33a-c868faf178ed',
   pulsera1: '0a57941d-27fb-438b-9613-761816d264d1',
   pulsera2: 'd23e8a79-bedf-4dbe-9779-1ea2d666343c'
 };
