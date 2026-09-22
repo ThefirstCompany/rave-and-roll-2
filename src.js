@@ -255,7 +255,7 @@ document.querySelector('#reentry').onclick=()=>reentry(document.querySelector('#
 document.querySelector('#manual').addEventListener('keydown',e=>{if(e.key==='Enter')control(e.target.value)});
 async function startScan(){
  scanner=new Html5Qrcode('reader');
- try{await scanner.start({facingMode:'environment'},{fps:10,qrbox:240},txt=>{if(scanner){scanner.stop().catch(()=>{});scanner=null;}control(txt);});}
+ try{await scanner.start({facingMode:'environment'},{fps:10,qrbox:240},txt=>{if(scanner){scanner.stop().catch(()=>{});scanner=null;}control(txt);});try{const c=scanner?.getRunningTrackCameraCapabilities();const z=c?.zoomFeature();if(z?.isSupported()){const target=Math.min(2,z.max());await scanner?.applyVideoConstraints({advanced:[{zoom:target}]});}}catch(_){}}catch(e){document.querySelector('#result').innerHTML='<div class="card">No se pudo abrir la cámara. Puedes introducir el código manualmente.</div>';}
  catch(e){document.querySelector('#result').innerHTML='<div class="card">No se pudo abrir la cámara. Puedes introducir el código manualmente.</div>';}
 }
 document.querySelector('#stop').onclick=()=>{if(scanner){scanner.stop().catch(()=>{});scanner=null;}};
