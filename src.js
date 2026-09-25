@@ -559,7 +559,7 @@ document.querySelector('#adminApp').insertAdjacentHTML('beforeend',`
   <div class="card">
     <h2>💰 Control de Caja</h2>
     <p>Resumen de ventas y reembolsos.</p>
-
+<button id="refreshCash">🔄 Actualizar caja</button>
     <div id="cashSummary">
       ⏳ Cargando...
     </div>
@@ -666,9 +666,13 @@ async function cargarCaja(){
         `).join('')
         : '<p>No hay movimientos todavía.</p>'
       }
+      
     </div>
   `;
 }
+document.querySelector('#refreshCash').onclick=async()=>{
+  await cargarCaja();
+};
 document.querySelector('#togglePassword').onclick=()=>{
   const p=document.querySelector('#loginPassword');
   const b=document.querySelector('#togglePassword');
