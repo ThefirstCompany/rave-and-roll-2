@@ -543,6 +543,31 @@ if(currentRole === 'admin'){
 
     // ADMIN: acceso completo
     if(currentRole === 'admin'){
+      const cajaBtn=document.createElement('button');
+
+cajaBtn.textContent='💰 Control de Caja';
+
+cajaBtn.onclick=async()=>{
+  show('cash');
+  await cargarCaja();
+};
+
+document.querySelector('#adminApp').prepend(cajaBtn);
+
+document.querySelector('#adminApp').insertAdjacentHTML('beforeend',`
+<section id="cash" class="tab hidden">
+  <div class="card">
+    <h2>💰 Control de Caja</h2>
+    <p>Resumen de ventas y reembolsos.</p>
+
+    <div id="cashSummary">
+      ⏳ Cargando...
+    </div>
+
+    <div id="cashHistory"></div>
+  </div>
+</section>
+`);
       document.querySelector('[data-t="dashboard"]').style.display = 'inline-block';
       document.querySelector('[data-t="scan"]').style.display = 'inline-block';
       document.querySelector('[data-t="tickets"]').style.display = 'inline-block';
@@ -575,6 +600,75 @@ if(currentRole === 'admin'){
       result.innerHTML = '❌ Rol no autorizado';
     }
 };
+async function cargarCaja(){
+
+  if(currentRole !== 'admin'){
+    alert('🚫 Solo el administrador puede ver el control de caja.');
+    return;
+  }
+
+  const summary=document.querySelector('#cashSummary');
+  const history=document.querySelector('#cashHistory');
+
+  summary.innerHTML='⏳ Cargando...';
+  history.innerHTML='';
+
+  const {data,error}=await sb
+    .from('sales')
+    .select('*')
+    .order('created_at',{ascending:false});
+
+  if(error){
+    summary.innerHTML='❌ No se pudo cargar el control de caja.';
+    return;
+  }
+
+  const ventas=data.filter(x=>x.action==='sale');
+  const reembolsos=data.filter(x=>x.action==='refund');
+
+  const totalVentas=ventas.reduce((s,x)=>s+Number(x.price||0),0);
+  const totalReembolsos=reembolsos.reduce((s,x)=>s+Number(x.price||0),0);
+  const neto=totalVentas-totalReembolsos;
+
+  const p1=ventas.filter(x=>x.ticket_type==='Preventa 1').length;
+  const p2=ventas.filter(x=>x.ticket_type==='Preventa 2').length;
+  const general=ventas.filter(x=>x.ticket_type==='General').length;
+
+  summary.innerHTML=`
+    <div class="card">
+      <h3>💵 Resumen</h3>
+      <p><b>Total vendido:</b> S/${totalVentas.toFixed(2)}</p>
+      <p><b>Reembolsado:</b> S/${totalReembolsos.toFixed(2)}</p>
+      <p><b>Recaudación neta:</b> S/${neto.toFixed(2)}</p>
+    </div>
+
+    <div class="card">
+      <h3>🎫 Entradas vendidas</h3>
+      <p>Preventa 1: ${p1}</p>
+      <p>Preventa 2: ${p2}</p>
+      <p>General: ${general}</p>
+    </div>
+  `;
+
+  history.innerHTML=`
+    <div class="card">
+      <h3>🧾 Historial</h3>
+      ${
+        data.length
+        ? data.map(x=>`
+          <p>
+            <b>${x.action==='sale'?'🟢 VENTA':'↩️ REEMBOLSO'}</b>
+            · ${x.ticket_code}
+            · S/${Number(x.price).toFixed(2)}
+            · ${x.username||'Usuario'}
+            · ${new Date(x.created_at).toLocaleString('es-PE')}
+          </p>
+        `).join('')
+        : '<p>No hay movimientos todavía.</p>'
+      }
+    </div>
+  `;
+}
 document.querySelector('#togglePassword').onclick=()=>{
   const p=document.querySelector('#loginPassword');
   const b=document.querySelector('#togglePassword');
